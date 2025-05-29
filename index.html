@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alles Gute zum Vatertag, Papa 💙</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      color: #003366;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #1f3c88;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.5em;
+      margin: 10px 0 30px;
+    }
+
+    img {
+      margin-top: 20px;
+      width: 260px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #1f3c88;
+    }
+
+    audio {
+      margin-top: 20px;
+    }
+
+    canvas {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 0 15px #1f3c88;
+      margin-top: 40px;
+    }
+
+    #gameText {
+      font-size: 1.4em;
+      margin: 20px 0;
+      color: #0f2541;
+    }
+
+    #score {
+      font-size: 1.6em;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #004080;
+    }
+  </style>
+</head>
+<body>
+  <h1>💙 Alles Gute zum Vatertag, Papa! 💙</h1>
+  <p>
+    Du bist der Held meiner Kindheit,<br>
+    mein Vorbild für die Zukunft<br>
+    und einfach der coolste Dad ever! 👑<br>
+    Heute wird gefeiert – nur für dich 🍻🎉
+  </p>
+
+  <img src="https://media.giphy.com/media/5VKbvrjxpVJCM/giphy.gif" alt="Papa cool GIF" />
+
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/03/audio_cb0b1470e4.mp3?filename=smooth-hip-hop-11266.mp3" type="audio/mpeg" />
+  </audio>
+
+  <p id="gameText">🎮 Sammle die 💙-Herzen mit Pfeiltasten oder Touch!</p>
+  <canvas id="gameCanvas" width="400" height="300"></canvas>
+  <div id="score">Herzen gesammelt: 0</div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const player = {
+      x: canvas.width / 2 - 25,
+      y: canvas.height - 30,
+      width: 50,
+      height: 20,
+      speed: 6,
+      dx: 0,
+    };
+
+    let hearts = [];
+    let score = 0;
+    const colors = ["#ff4d4d", "#4da6ff", "#66ff66", "#ffff66", "#ff66cc"];
+
+    function createHeart() {
+      const x = Math.random() * (canvas.width - 30);
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      hearts.push({ x, y: -30, size: 25, color });
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = "#003366";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function drawHearts() {
+      hearts.forEach(h => {
+        ctx.fillStyle = h.color;
+        ctx.beginPath();
+        ctx.moveTo(h.x + h.size / 2, h.y + h.size / 3);
+        ctx.bezierCurveTo(h.x + h.size / 2, h.y, h.x, h.y, h.x, h.y + h.size / 3);
+        ctx.bezierCurveTo(h.x, h.y + h.size, h.x + h.size / 2, h.y + h.size, h.x + h.size / 2, h.y + h.size * 1.5);
+        ctx.bezierCurveTo(h.x + h.size / 2, h.y + h.size, h.x + h.size, h.y + h.size, h.x + h.size, h.y + h.size / 3);
+        ctx.bezierCurveTo(h.x + h.size, h.y, h.x + h.size / 2, h.y, h.x + h.size / 2, h.y + h.size / 3);
+        ctx.fill();
+      });
+    }
+
+    function movePlayer() {
+      player.x += player.dx;
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
+
+    function moveHearts() {
+      hearts.forEach(h => h.y += 3);
+      hearts = hearts.filter(h => h.y < canvas.height + 40);
+    }
+
+    function checkCollisions() {
+      hearts.forEach((h, i) => {
+        if (
+          h.x < player.x + player.width &&
+          h.x + h.size > player.x &&
+          h.y < player.y + player.height &&
+          h.y + h.size > player.y
+        ) {
+          hearts.splice(i, 1);
+          score++;
+          document.getElementById("score").textContent = "Herzen gesammelt: " + score;
+        }
+      });
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function updateGame() {
+      clearCanvas();
+      drawPlayer();
+      drawHearts();
+      movePlayer();
+      moveHearts();
+      checkCollisions();
+      requestAnimationFrame(updateGame);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") player.dx = -player.speed;
+      if (e.key === "ArrowRight") player.dx = player.speed;
+    });
+
+    document.addEventListener("keyup", () => player.dx = 0);
+
+    // Touch (für Handy)
+    canvas.addEventListener("touchstart", (e) => {
+      const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+      if (touchX < player.x) {
+        player.dx = -player.speed;
+      } else if (touchX > player.x + player.width) {
+        player.dx = player.speed;
+      }
+    });
+
+    canvas.addEventListener("touchend", () => {
+      player.dx = 0;
+    });
+
+    setInterval(createHeart, 1000);
+    updateGame();
+  </script>
+</body>
+</html>
